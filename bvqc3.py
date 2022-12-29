@@ -5,131 +5,142 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import time # To measure Execution time
 from PIL import Image # PIL is used to directly export Grayscale images
 
 # codebook translation
 def codebookTranslate(index, g0, g1):
 
     # le codebook
-    codebook = np.array([
+    match index:
 
         # index c0
-        [
-            [g0, g0, g1],
-            [g0, g1, g1],
-            [g1, g1, g1]
-        ],
+        case 0:
+            return [
+                [g0, g0, g1],
+                [g0, g1, g1],
+                [g1, g1, g1]
+            ]
 
         # index c1
-        [
-            [g1, g0, g0],
-            [g1, g1, g0],
-            [g1, g1, g1]
-        ],
+        case 1:
+            return [
+                [g1, g0, g0],
+                [g1, g1, g0],
+                [g1, g1, g1]
+            ]
 
         # index c2
-        [
-            [g1, g1, g1],
-            [g1, g1, g0],
-            [g1, g0, g0]
-        ],
+        case 2:
+            return [
+                [g1, g1, g1],
+                [g1, g1, g0],
+                [g1, g0, g0]
+            ]
 
         # index c3
-        [
-            [g1, g1, g1],
-            [g0, g1, g1],
-            [g0, g0, g1]
-        ],
+        case 3:
+            return [
+                [g1, g1, g1],
+                [g0, g1, g1],
+                [g0, g0, g1]
+            ]
 
         # index c4
-        [
-            [g0, g0, g0],
-            [g1, g1, g1],
-            [g1, g1, g1]
-        ],
+        case 4:
+            return [
+                [g0, g0, g0],
+                [g1, g1, g1],
+                [g1, g1, g1]
+            ]
 
         # index c5
-        [
-            [g1, g1, g1],
-            [g1, g1, g1],
-            [g0, g0, g0]
-        ],
+        case 5:
+            return [
+                [g1, g1, g1],
+                [g1, g1, g1],
+                [g0, g0, g0]
+            ]
 
         # index c6
-        [
-            [g1, g1, g0],
-            [g1, g1, g0],
-            [g1, g1, g0]
-        ],
+        case 6:
+            return [
+                [g1, g1, g0],
+                [g1, g1, g0],
+                [g1, g1, g0]
+            ]
 
         # index c7
-        [
-            [g0, g1, g1],
-            [g0, g1, g1],
-            [g0, g1, g1]
-        ],
+        case 7:
+            return [
+                [g0, g1, g1],
+                [g0, g1, g1],
+                [g0, g1, g1]
+            ]
 
         # index c8
-        [
-            [g1, g1, g0],
-            [g1, g0, g0],
-            [g0, g0, g0]
-        ],
+        case 8:
+            return [
+                [g1, g1, g0],
+                [g1, g0, g0],
+                [g0, g0, g0]
+            ]
 
         # index c9
-        [
-            [g0, g1, g1],
-            [g0, g0, g1],
-            [g0, g0, g0]
-        ],
+        case 9:
+            return [
+                [g0, g1, g1],
+                [g0, g0, g1],
+                [g0, g0, g0]
+            ]
 
         # index c10
-        [
-            [g0, g0, g0],
-            [g0, g0, g1],
-            [g0, g1, g1]
-        ],
+        case 10:
+            return [
+                [g0, g0, g0],
+                [g0, g0, g1],
+                [g0, g1, g1]
+            ]
 
         # index c11
-        [
-            [g0, g0, g0],
-            [g1, g0, g0],
-            [g1, g1, g0]
-        ],
+        case 11:
+            return [
+                [g0, g0, g0],
+                [g1, g0, g0],
+                [g1, g1, g0]
+            ]
 
         # index c12
-        [
-            [g1, g1, g1],
-            [g0, g0, g0],
-            [g0, g0, g0]
-        ],
+        case 12:
+            return [
+                [g1, g1, g1],
+                [g0, g0, g0],
+                [g0, g0, g0]
+            ]
 
         # index c13
-        [
-            [g0, g0, g0],
-            [g0, g0, g0],
-            [g1, g1, g1]
-        ],
+        case 13:
+            return [
+                [g0, g0, g0],
+                [g0, g0, g0],
+                [g1, g1, g1]
+            ]
 
         # index c14
-        [
-            [g0, g0, g1],
-            [g0, g0, g1],
-            [g0, g0, g1]
-        ],
+        case 14:
+            return [
+                [g0, g0, g1],
+                [g0, g0, g1],
+                [g0, g0, g1]
+            ]
 
         # index c15
-        [
-            [g1, g0, g0],
-            [g1, g0, g0],
-            [g1, g0, g0]
-        ]
+        case 15:
+            return [
+                [g1, g0, g0],
+                [g1, g0, g0],
+                [g1, g0, g0]
+            ]
         
-    ])
-
-    return codebook[index]
-
 # encoding function
 def BVQC3encode(in_image_filename, out_encoding_result_filename):
 
@@ -338,9 +349,6 @@ def BVQC3decode(in_encoding_result_filename, out_reconstructed_image_filename):
 
 # main program
 
-# start time
-st = time.process_time()
-
 # ask for input for input file name & set the output file name
 print("Please input the file name of an image file.")
 print("The image file should be a grayscale image in PNG file format. (Type the whole file name including the file extension)")
@@ -364,7 +372,3 @@ print("Estimated Mean Square Error:", mse)
 # calculate peak-to-peak signal-to-noise ratio
 ppsnr = 10 * np.log10( ( 255 ** 2 ) / mse)
 print("Estimated Peak-to-Peak Signal-to-Noise Ratio:", ppsnr)
-
-# end time
-et = time.process_time()
-print('Exec time:', et - st, 'seconds')
