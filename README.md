@@ -22,9 +22,7 @@ The program uses a new feature from Python 3.10 `match/case` and thus requires P
 
 ## Usage
 ```
-git clone https://github.com/WessellUrdata/bvqc3
-cd ./bvqc3
-python ./bvqc3.py
+git clone https://github.com/WessellUrdata/bvqc3 && cd ./bvqc3 && python ./bvqc3.py
 ```
 
 ## Example Output
