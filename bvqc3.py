@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image # PIL is used to directly export Grayscale images
+import hashlib # Used to generate SHA256 checksums of images
 
 # codebook translation
 def codebookTranslate(index, g0, g1):
@@ -176,6 +177,22 @@ def BVQC3encode(in_image_filename, out_encoding_result_filename):
         plt.title("Original Image")
         plt.show()
 
+        # generate SHA256 checksum of original image (to be stored in the binary file and for comparison)
+        chksum = hashlib.sha256(image).digest()
+
+        # check if file had been processed before and binary file still exists, skip if yes
+        if os.path.exists(out_encoding_result_filename) == True:
+
+            # read the SHA256 checksum from the binary file
+            with open(out_encoding_result_filename, 'rb') as f:
+                readChksum = f.read(32)
+            f.close() # be a good programmer and close the file when you're done :)
+
+            # if the checksums match, skip encoding
+            if chksum == readChksum:
+                print("File had been processed before.\nSkipping encoding...")
+                return
+
         # set the amount of rows and columns of the blocks
         row = image.shape[0] // 3
         column = image.shape[1] // 3
@@ -223,6 +240,8 @@ def BVQC3encode(in_image_filename, out_encoding_result_filename):
 
             # write the header
 
+            f.write(chksum) # 32 bytes: SHA256 checksum
+
             f.write(np.uint8(8)) # byte 1: header length
             f.write(np.uint8(3)) # byte 2: block size
             f.write(np.uint16(column)) # byte 3-4: number of columns
@@ -260,6 +279,9 @@ def BVQC3decode(in_encoding_result_filename, out_reconstructed_image_filename):
     with open(in_encoding_result_filename, 'rb') as f:
 
         # parse the header
+
+        # read the SHA256 checksum (we don't need the result, we just need to skip the lines)
+        np.frombuffer(f.read(32))
 
         # read the header length from first byte
         headerLength = np.frombuffer(f.read(1), dtype = np.uint8)[0]
