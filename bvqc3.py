@@ -8,13 +8,14 @@ import matplotlib.image as mpimg
 from PIL import Image # PIL is used to directly export Grayscale images
 import hashlib # Used to generate SHA256 checksums of images
 
-# codebook translation
+# Codebook Translation function
+# takes the index, g0, g1 as parameters
+# returns the matching codebook
+
 def codebookTranslate(index, g0, g1):
 
-    # le codebook
     match index:
 
-        # index c0
         case 0:
             return [
                 [g0, g0, g1],
@@ -22,7 +23,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g1, g1]
             ]
 
-        # index c1
         case 1:
             return [
                 [g1, g0, g0],
@@ -30,7 +30,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g1, g1]
             ]
 
-        # index c2
         case 2:
             return [
                 [g1, g1, g1],
@@ -38,7 +37,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g0, g0]
             ]
 
-        # index c3
         case 3:
             return [
                 [g1, g1, g1],
@@ -46,7 +44,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g0, g1]
             ]
 
-        # index c4
         case 4:
             return [
                 [g0, g0, g0],
@@ -54,7 +51,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g1, g1]
             ]
 
-        # index c5
         case 5:
             return [
                 [g1, g1, g1],
@@ -62,7 +58,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g0, g0]
             ]
 
-        # index c6
         case 6:
             return [
                 [g1, g1, g0],
@@ -70,7 +65,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g1, g0]
             ]
 
-        # index c7
         case 7:
             return [
                 [g0, g1, g1],
@@ -78,7 +72,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g1, g1]
             ]
 
-        # index c8
         case 8:
             return [
                 [g1, g1, g0],
@@ -86,7 +79,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g0, g0]
             ]
 
-        # index c9
         case 9:
             return [
                 [g0, g1, g1],
@@ -94,7 +86,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g0, g0]
             ]
 
-        # index c10
         case 10:
             return [
                 [g0, g0, g0],
@@ -102,7 +93,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g1, g1]
             ]
 
-        # index c11
         case 11:
             return [
                 [g0, g0, g0],
@@ -110,7 +100,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g1, g0]
             ]
 
-        # index c12
         case 12:
             return [
                 [g1, g1, g1],
@@ -118,7 +107,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g0, g0]
             ]
 
-        # index c13
         case 13:
             return [
                 [g0, g0, g0],
@@ -126,7 +114,6 @@ def codebookTranslate(index, g0, g1):
                 [g1, g1, g1]
             ]
 
-        # index c14
         case 14:
             return [
                 [g0, g0, g1],
@@ -134,7 +121,6 @@ def codebookTranslate(index, g0, g1):
                 [g0, g0, g1]
             ]
 
-        # index c15
         case 15:
             return [
                 [g1, g0, g0],
@@ -217,10 +203,8 @@ def BVQC3encode(in_image_filename, out_encoding_result_filename):
                 meanArray[(x // 3), (y // 3)] = min(255, (mean // 2) * 2) # mean prime = min(255, 2 * round-down[mean / 2])
                 stdDeviationArray[(x // 3), (y // 3)] = min(127, (stdDeviation // 4) * 4) # std prime = min(127, 4 * round-down[std / 4])
 
-                # calculate the index of the block
-
+                # calculate g0 and g1 for distance calculation
                 g0 = np.uint8(max(0, np.int16(meanArray[(x // 3), (y // 3)]) - stdDeviationArray[(x // 3), (y // 3)])) # g0 = max(0, mean prime - std prime)
-
                 g1 = np.uint8(min(255, np.int16(meanArray[(x // 3), (y // 3)]) + stdDeviationArray[(x // 3), (y // 3)])) # g1 = min(255, mean prime + std prime)
 
                 # calculate the distances between the block and codewords
@@ -232,7 +216,7 @@ def BVQC3encode(in_image_filename, out_encoding_result_filename):
                 for i in range(16):
                     distance[i] = np.sum( np.square( (block.astype(np.uint16) - codebookTranslate(i, g0, g1)) ) )
                 
-                # save the index of the block
+                # save the index of the closest codeblock
                 indexArray[(x // 3), (y // 3)] = np.argmin(distance)
 
         # output the data structure into a binary file
@@ -327,7 +311,7 @@ def BVQC3decode(in_encoding_result_filename, out_reconstructed_image_filename):
                             
     f.close() # be a good programmer and close the file when you're done :)
 
-    # Initialize image
+    # init image
     image = np.zeros([row * blockSize + skippedRow, column * blockSize + skippedColumn], dtype = np.uint8)
 
     for x in range(row):
@@ -340,7 +324,6 @@ def BVQC3decode(in_encoding_result_filename, out_reconstructed_image_filename):
             index = indexArray[x, y]
 
             # get the codeword
-
             g0 = np.uint8(max(0, mean - np.int16(std))) # g0 = max(0, mean prime - std prime)
             g1 = np.uint8(min(255, mean + np.int16(std))) # g1 = min(255, mean prime + std prime)
             
@@ -362,7 +345,6 @@ def BVQC3decode(in_encoding_result_filename, out_reconstructed_image_filename):
     plt.show()
 
     # save the image
-    
     im = Image.fromarray(image)
     im.save(out_reconstructed_image_filename)
     print("A reconstructed image file " + out_reconstructed_image_filename + " has been created.")
